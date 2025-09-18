@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dibujo Rosa</title>
+
+  <!-- Manifest para que se instale como app -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Icono principal -->
+  <link rel="icon" href="icon-192.png">
+
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #ffd6eb, #ff9fcf);
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      padding: 15px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 2px #d46fa3;
+    }
+
+    #toolbar {
+      margin: 10px;
+    }
+
+    button, input[type=color], input[type=range] {
+      margin: 5px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: none;
+      background: #ffb6d9;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ff80c0;
+    }
+
+    canvas {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0px 0px 10px #d46fa3;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+  <header>🎨 Dibujo Rosa</header>
+
+  <!-- Barra de herramientas -->
+  <div id="toolbar">
+    <input type="color" id="colorPicker" value="#ff4081">
+    <input type="range" id="brushSize" min="2" max="40" value="5">
+    <button id="clear">🧽 Limpiar</button>
+    <button id="save">💾 Guardar</button>
+  </div>
+
+  <!-- Área de dibujo -->
+  <canvas id="canvas" width="320" height="480"></canvas>
+
+  <script>
+    // ===== Configuración inicial =====
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const colorPicker = document.getElementById("colorPicker");
+    const brushSize = document.getElementById("brushSize");
+    let painting = false;
+
+    // ===== Dibujar =====
+    function startDraw(e) {
+      painting = true;
+      draw(e);
+    }
+
+    function endDraw() {
+      painting = false;
+      ctx.beginPath();
+    }
+
+    function draw(e) {
+      if (!painting) return;
+
+      ctx.lineWidth = brushSize.value;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = colorPicker.value;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    // Eventos mouse/touch
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mouseup", endDraw);
+    canvas.addEventListener("mousemove", draw);
+
+    canvas.addEventListener("touchstart", startDraw);
+    canvas.addEventListener("touchend", endDraw);
+    canvas.addEventListener("touchmove", draw);
+
+    // Botón limpiar
+    document.getElementById("clear").addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // Botón guardar
+    document.getElementById("save").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "dibujo.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  </script>
+</body>
+</html>
